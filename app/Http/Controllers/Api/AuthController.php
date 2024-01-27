@@ -12,23 +12,26 @@ use App\Models\PasswordReset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use App\Notifications\PasswordResetNotification;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 
 class AuthController extends Controller
 {
-
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->tokens()->delete();
-
-        return response()->success([], 'Logged out successfully', 200);
+        $user = $request->user();
+    
+        if ($user) {
+            $user->tokens()->delete();
+            return response()->success([], 'Logged out successfully', 200);
+        } else {
+            return response()->error('Unauthorized', 'User not authenticated', 401);
+        }
     }
-
     public function register(Request $request):JsonResponse
     {
-
         $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
